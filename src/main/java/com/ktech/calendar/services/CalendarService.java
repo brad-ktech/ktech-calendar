@@ -2,16 +2,15 @@ package com.ktech.calendar.services;
 
 
 import com.amazonaws.util.IOUtils;
-
 import com.ktech.calendar.entities.CalendarEntryAttendee;
 import com.ktech.calendar.entities.CalendarType;
 import com.ktech.calendar.entities.MedicalExpert;
-import com.ktech.starter.apis.CalendarEntryApi;
+import com.ktech.starter.clio.apis.CalendarAPI;
+import com.ktech.starter.clio.models.CalendarEntry;
 import com.ktech.starter.dao.AutoDaoService;
 import com.ktech.starter.dao.QueryParameters;
 import com.ktech.starter.entities.Matter;
 import com.ktech.starter.enums.QueryComparatorEnum;
-import com.ktech.starter.models.CalendarEntry;
 import org.apache.http.client.utils.URIBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,7 +24,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -36,7 +34,7 @@ public class CalendarService {
 
     private AutoDaoService dao;
     private RestTemplate rest;
-    private CalendarEntryApi api;
+    private CalendarAPI api;
 
     @Value("${report.url}")
     private String subjectUrl;
@@ -51,7 +49,7 @@ public class CalendarService {
     private static List<CalendarType> types;
 
 
-    public CalendarService(@Autowired AutoDaoService dao, @Autowired RestTemplate rest, @Autowired CalendarEntryApi api){
+    public CalendarService(@Autowired AutoDaoService dao, @Autowired RestTemplate rest, @Autowired CalendarAPI api){
 
         this.rest = rest;
         this.dao = dao;
@@ -159,14 +157,13 @@ public class CalendarService {
     }
 
 
-    public void saveCalendarEntry(CalendarEntry ce) throws URISyntaxException {
+    public void saveCalendarEntry(CalendarEntry ce) throws URISyntaxException, IOException {
 
 
-            api.createCalendarEntry(ce);
+        api.saveCalendarEntry(ce);
 
 
     }
-
 
 
 }

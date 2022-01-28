@@ -29,6 +29,9 @@ public class CalendarType {
     @Column(name="SHARED_WITH_EXPERT")
     private Integer isShared;
 
+    @Column(name="CLIO_ID")
+    private Long clioId;
+
     public String getPrettyName(){
         return getName().substring(2);
     }

@@ -4,6 +4,9 @@ import com.ktech.calendar.entities.CalendarEntry;
 import com.ktech.calendar.entities.CalendarType;
 import com.ktech.calendar.entities.MedicalExpert;
 import com.ktech.calendar.services.CalendarService;
+import com.ktech.starter.clio.models.Calendar;
+import com.ktech.starter.clio.models.CalendarAttendee;
+import com.ktech.starter.clio.models.CalendarAttendeeType;
 import com.ktech.starter.entities.Matter;
 import com.vaadin.flow.component.accordion.Accordion;
 import com.vaadin.flow.component.button.Button;
@@ -28,12 +31,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.olli.FileDownloadWrapper;
 import org.vaadin.stefan.fullcalendar.*;
 
+import java.io.IOException;
 import java.net.URISyntaxException;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
+
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -51,6 +56,7 @@ public class CalendarView extends VerticalLayout implements BeforeEnterObserver{
     private H2 name = null;
     private MedicalExpert expert;
     private long offset = 0;
+
 
 
     //new entry dialog fields
@@ -196,9 +202,6 @@ public class CalendarView extends VerticalLayout implements BeforeEnterObserver{
 
 
 
-
-
-
         newEntryDescription.setWidthFull();
         newEntryDescription.setLabel("Event Description");
         newEntryDescription.setPlaceholder("Write event description here");
@@ -207,7 +210,14 @@ public class CalendarView extends VerticalLayout implements BeforeEnterObserver{
         HorizontalLayout actions = new HorizontalLayout();
         Button save = new Button("Save");
         save.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_CONTRAST);
-        save.addClickListener(e -> saveEntry());
+        save.addClickListener(e -> {
+            saveEntry();
+            dialog.close();
+            Notification saving = Notification.show("Calendar Entry Saved...", 6000, Notification.Position.BOTTOM_END);
+            saving.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+            tempEntry();
+
+        });
 
 
 
@@ -228,20 +238,53 @@ public class CalendarView extends VerticalLayout implements BeforeEnterObserver{
 
     private void saveEntry(){
 
-        com.ktech.starter.models.CalendarEntry entry = new com.ktech.starter.models.CalendarEntry();
+        com.ktech.starter.clio.models.CalendarEntry entry = new com.ktech.starter.clio.models.CalendarEntry();
         entry.setDescription(newEntryDescription.getValue());
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy HH:mm");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SS'Z'");
         entry.setStartAt(startPicker.getValue().format(formatter));
         entry.setEndAt(endPicker.getValue().format(formatter));
         entry.setLocation(location.getValue());
         entry.setAllDay(allDay.getValue());
 
+        CalendarAttendee attendee = new CalendarAttendee();
+        attendee.setType(CalendarAttendeeType.CONTACT);
+        attendee.setId(expert.getContactId());
+        attendee.setName(expert.getFirstName() + " " + expert.getLastName());
+        attendee.setEmail(expert.getEmail());
+        attendee.setEnabled(true);
+        entry.setAttendees(Collections.singletonList(attendee));
+
+        CalendarType type = select.getValue();
+        entry.setSummary(type.getPrettyName());
+        Calendar c = new Calendar();
+        c.setId(type.getClioId());
+        entry.setCalendar(c);
+
 
         try {
             service.saveCalendarEntry(entry);
-        } catch (URISyntaxException e) {
+        } catch (URISyntaxException | IOException e) {
             e.printStackTrace();
         }
+
+
+    }
+
+    private void tempEntry(){
+
+        //Add "fake" entry to the calendar until the db is updated by the webhook
+        Entry entry = new Entry();
+        CalendarType type = select.getValue();
+        entry.setTitle(type.getPrettyName());
+        entry.setColor(type.getHex());
+        entry.setStart(startPicker.getValue());
+        entry.setEnd(endPicker.getValue());
+        entry.setDescription(newEntryDescription.getValue());
+
+        entry.setCustomProperty("location", location.getValue());
+        entry.setCustomProperty("allDay", allDay.getValue());
+
+        calendar.addEntry(entry);
 
     }
 
@@ -349,15 +392,18 @@ public class CalendarView extends VerticalLayout implements BeforeEnterObserver{
     public void beforeEnter(BeforeEnterEvent beforeEnterEvent) {
        Location location = beforeEnterEvent.getLocation();
        Map<String, List<String>> map = location.getQueryParameters().getParameters();
-        List<String> values = map.get("contact_id") ;
-
-       if(ObjectUtils.isNotEmpty(values)) {
-
-           String contactId = values.stream().findFirst().orElse(null);
+        List<String> subjectUrl = map.get("subject_url") ;
 
 
-           if (ObjectUtils.isNotEmpty(contactId)) {
+       if(ObjectUtils.isNotEmpty(subjectUrl)) {
 
+           String contactUrl = subjectUrl.stream().findFirst().orElse(null);
+
+           if (ObjectUtils.isNotEmpty(contactUrl)) {
+
+               String[] parts = contactUrl.split("/");
+               String contactId = parts[parts.length-1];
+               System.out.println(contactId);
                Optional<MedicalExpert> meOpt = service.getMedicalExpertFromContactId(contactId);
                if (meOpt.isPresent()) {
                    expert = meOpt.get();
@@ -409,6 +455,15 @@ public class CalendarView extends VerticalLayout implements BeforeEnterObserver{
     }
 
 
+
+    private void reload(){
+
+        calendar.removeAllEntries();
+        entries.addAll(service.getCalendarEntriesForMedicalExpert(expert));
+        getEntries();
+
+
+    }
 
 
 }
