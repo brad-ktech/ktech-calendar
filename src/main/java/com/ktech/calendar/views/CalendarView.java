@@ -403,7 +403,7 @@ public class CalendarView extends VerticalLayout implements BeforeEnterObserver{
 
                String[] parts = contactUrl.split("/");
                String contactId = parts[parts.length-1];
-               System.out.println(contactId);
+
                Optional<MedicalExpert> meOpt = service.getMedicalExpertFromContactId(contactId);
                if (meOpt.isPresent()) {
                    expert = meOpt.get();
