@@ -43,7 +43,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @PageTitle("Calendar")
-@Route(value = "calendar/", layout = MainLayout.class)
+@Route(value = "calendar", layout = MainLayout.class)
 public class CalendarView extends VerticalLayout implements BeforeEnterObserver{
 
 
