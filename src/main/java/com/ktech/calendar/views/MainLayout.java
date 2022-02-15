@@ -127,7 +127,7 @@ public class MainLayout extends AppLayout {
         MenuItemInfo[] menuItems = new MenuItemInfo[]{ //
 
                 new MenuItemInfo("Expert Calendar", "la la-calendar", CalendarView.class), //
-                new MenuItemInfo("Expert Events", "la-file-medical-alt", ListView.class), //
+                new MenuItemInfo("Expert Events", "la-file-medical-alt", BillingCodeView.class), //
 
 
 

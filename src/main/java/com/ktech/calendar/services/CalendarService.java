@@ -5,7 +5,7 @@ import com.amazonaws.util.IOUtils;
 import com.ktech.calendar.entities.CalendarEntryAttendee;
 import com.ktech.calendar.entities.CalendarType;
 import com.ktech.calendar.entities.MedicalExpert;
-import com.ktech.starter.clio.apis.CalendarAPI;
+import com.ktech.starter.clio.apis.ClioApi;
 import com.ktech.starter.clio.models.CalendarEntry;
 import com.ktech.starter.dao.AutoDaoService;
 import com.ktech.starter.dao.QueryParameters;
@@ -34,7 +34,7 @@ public class CalendarService {
 
     private AutoDaoService dao;
     private RestTemplate rest;
-    private CalendarAPI api;
+    private ClioApi api;
 
     @Value("${report.url}")
     private String subjectUrl;
@@ -49,7 +49,7 @@ public class CalendarService {
     private static List<CalendarType> types;
 
 
-    public CalendarService(@Autowired AutoDaoService dao, @Autowired RestTemplate rest, @Autowired CalendarAPI api){
+    public CalendarService(@Autowired AutoDaoService dao, @Autowired RestTemplate rest, @Autowired ClioApi api){
 
         this.rest = rest;
         this.dao = dao;
@@ -64,8 +64,6 @@ public class CalendarService {
     }
 
     public Optional<MedicalExpert> getMedicalExpertFromContactId(String id){
-
-
 
         Optional<MedicalExpert> opt = dao.find(MedicalExpert.class, new QueryParameters("contactId", Long.parseLong(id)));
         if(!opt.isPresent()){
@@ -160,7 +158,7 @@ public class CalendarService {
     public void saveCalendarEntry(CalendarEntry ce) throws URISyntaxException, IOException {
 
 
-        api.saveCalendarEntry(ce);
+        api.patch(ce);
 
 
     }

@@ -8,9 +8,12 @@ import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
+import com.vaadin.flow.component.grid.ItemClickEvent;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.H4;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
@@ -37,6 +40,7 @@ public class BillingCodeView extends Div implements AfterNavigationObserver {
     private List<MedicalExpert> mez = new ArrayList<>();
     private BillingCodeService bcs;
     private TextField filter = new TextField();
+    private TextField newBillingCode = new TextField();
 
 
     public BillingCodeView(@Autowired BillingCodeService bcs) {
@@ -52,6 +56,9 @@ public class BillingCodeView extends Div implements AfterNavigationObserver {
         filter.addValueChangeListener(e -> updateList(e));
         add(filter, grid);
     }
+
+
+
 
     private HorizontalLayout createCard(MedicalExpert me) {
         HorizontalLayout card = new HorizontalLayout();
