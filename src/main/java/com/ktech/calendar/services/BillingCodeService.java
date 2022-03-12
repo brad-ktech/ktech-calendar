@@ -3,11 +3,14 @@ package com.ktech.calendar.services;
 import com.ktech.calendar.entities.MedicalExpert;
 import com.ktech.starter.clio.apis.ClioApi;
 import com.ktech.starter.dao.AutoDaoService;
+import com.ktech.starter.dao.QueryParameters;
 import com.ktech.starter.entities.Contact;
+import com.ktech.starter.enums.QueryComparatorEnum;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -28,11 +31,17 @@ public class BillingCodeService {
 
         List<MedicalExpert> mez = new ArrayList<>();
 
+        QueryParameters qp = new QueryParameters();
+        qp.put("billingCode", null, QueryComparatorEnum.NOT_NULL);
+        qp.setOrderByColumns("billingCode");
 
-        Optional<List<MedicalExpert>> opt = dao.findAll(MedicalExpert.class);
+
+
+        Optional<List<MedicalExpert>> opt = dao.findByParameters(MedicalExpert.class, qp);
         if(opt.isPresent()){
             mez = opt.get();
-            mez.sort((MedicalExpert me1, MedicalExpert me2)->me1.getBillingCode().compareTo(me2.getBillingCode()));
+
+
         }
         return mez;
 

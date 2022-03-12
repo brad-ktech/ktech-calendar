@@ -5,7 +5,10 @@ import com.ktech.calendar.entities.NetSuiteAudit;
 import com.ktech.starter.dao.AutoDaoService;
 import com.ktech.starter.dao.QueryParameters;
 import com.ktech.starter.enums.QueryComparatorEnum;
+import com.ktech.starter.services.SQSMessageProducerService;
+import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -18,18 +21,31 @@ import java.util.Optional;
 @Service
 public class NetSuiteAuditLogService {
 
-
+    @Autowired
     private AutoDaoService dao;
 
-    public NetSuiteAuditLogService(@Autowired AutoDaoService dao){
+    @Autowired
+    private SQSMessageProducerService sqs;
 
-        this.dao = dao;
-    }
+    @Value("${sqs.netsuite.send}")
+    private String queue;
+
 
     public void retry(NetSuiteAudit nsa){
 
+        sqs.send(queue, nsa);
+
+    }
 
 
+    public boolean wasInvoiceSentSuccessfully(NetSuiteAudit nsa){
+
+
+        QueryParameters qp = new QueryParameters();
+        qp.put("clioId", nsa.getClioId(), QueryComparatorEnum.EQ);
+        qp.put("status", nsa.getStatus(), QueryComparatorEnum.EQ);
+        int count = dao.count(NetSuiteAudit.class, qp);
+        return BooleanUtils.toBoolean(count);
 
     }
 

@@ -63,6 +63,8 @@ public class CalendarService {
 
     }
 
+
+
     public Optional<MedicalExpert> getMedicalExpertFromContactId(String id){
 
         Optional<MedicalExpert> opt = dao.find(MedicalExpert.class, new QueryParameters("contactId", Long.parseLong(id)));

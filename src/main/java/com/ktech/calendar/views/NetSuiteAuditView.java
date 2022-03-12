@@ -10,13 +10,16 @@ import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.datepicker.DatePicker;
+import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.TextField;
@@ -27,6 +30,7 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.awt.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -49,8 +53,6 @@ public class NetSuiteAuditView extends Div implements AfterNavigationObserver {
         setSizeFull();
         this.service = service;
         grid.setHeight("100%");
-
-
         grid.addComponentColumn(nsa -> {
             HorizontalLayout layout = new HorizontalLayout();
             layout.add(getIcon(nsa.getStatus()), new Span(nsa.getStatus()));
@@ -64,12 +66,36 @@ public class NetSuiteAuditView extends Div implements AfterNavigationObserver {
             HorizontalLayout layout = new HorizontalLayout();
             Button retry = new Button(new Icon(VaadinIcon.RECYCLE));
             retry.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_ERROR);
-            retry.setVisible("INVOICE".equalsIgnoreCase(nsa.getType()) && "FAILED".equalsIgnoreCase(nsa.getStatus()));
+            retry.setVisible(("INVOICE".equalsIgnoreCase(nsa.getType()) || "CREDIT_MEMO".equalsIgnoreCase(nsa.getType()))
+                                                                && "FAILED".equalsIgnoreCase(nsa.getStatus()));
             retry.setDisableOnClick(true);
             retry.addClickListener(clicked -> {
-                Notification retrying = Notification.show("Retrying...", 7000, Notification.Position.BOTTOM_END);
-                retrying.addThemeVariants(NotificationVariant.LUMO_ERROR);
-                this.service.retry(nsa);
+
+
+                if(service.wasInvoiceSentSuccessfully(nsa)){
+                    Dialog dialog = new Dialog();
+                    dialog.setModal(true);
+                    dialog.setDraggable(false);
+                    dialog.setCloseOnOutsideClick(false);
+                    Paragraph message = new Paragraph("Selected Invoice was previously successfully retried and sent to Netsuite.");
+                    dialog.add(message);
+                    dialog.open();
+                    Button ok = new Button("OK");
+                    ok.addClickListener(click -> dialog.close());
+                    ok.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_CONTRAST);
+                    HorizontalLayout actions = new HorizontalLayout();
+                    actions.setWidthFull();
+                    actions.setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
+                    actions.add(ok);
+                    dialog.add(actions);
+
+                }else{
+                    Notification retrying = Notification.show("Retrying...", 7000, Notification.Position.BOTTOM_END);
+                    retrying.addThemeVariants(NotificationVariant.LUMO_ERROR);
+                    this.service.retry(nsa);
+                }
+
+
             });
             layout.add(retry);
             return layout;

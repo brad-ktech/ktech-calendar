@@ -1,12 +1,10 @@
 package com.ktech.calendar.entities;
 
+import com.ktech.starter.entities.SQSMessagable;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -14,7 +12,10 @@ import java.time.format.DateTimeFormatter;
 @Table(name="NETSUITE_AUDIT")
 @Getter
 @Setter
-public class NetSuiteAudit {
+public class NetSuiteAudit implements SQSMessagable {
+
+    @Transient
+    private static String message = "{\"id\": TO_REPLACE}";
 
 
     @Id
@@ -43,6 +44,12 @@ public class NetSuiteAudit {
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM-dd-YYYY HH:mm a");
         return formatter.format(getLogTime());
+    }
+
+    public String getSQSMessage(){
+
+        return message.replace("TO_REPLACE", getClioId().toString());
+
     }
 
 

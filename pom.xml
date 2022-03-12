@@ -150,7 +150,7 @@
         <dependency>
             <groupId>com.ktech</groupId>
             <artifactId>ktech-spring-aws-starter</artifactId>
-            <version>0.0.60-SNAPSHOT</version>
+            <version>0.0.3-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.vaadin.componentfactory</groupId>
@@ -169,6 +169,12 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-csv</artifactId>
             <version>1.9.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.vaadin.componentfactory</groupId>
+            <artifactId>vcf-date-range-picker</artifactId>
+            <version>2.0.0</version>
         </dependency>
 
 

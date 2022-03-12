@@ -3,17 +3,10 @@ package com.ktech.calendar.views;
 
 import com.ktech.calendar.entities.MedicalExpert;
 import com.ktech.calendar.services.BillingCodeService;
-import com.ktech.calendar.services.CalendarService;
 import com.vaadin.flow.component.HasValue;
-import com.vaadin.flow.component.avatar.Avatar;
-import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
-import com.vaadin.flow.component.grid.ItemClickEvent;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.H4;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
@@ -29,6 +22,7 @@ import com.vaadin.flow.router.Route;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -111,7 +105,7 @@ public class BillingCodeView extends Div implements AfterNavigationObserver {
         List<MedicalExpert> filtered = mez.stream()
                                           .filter(me -> me.getBillingCode().contains(value.toUpperCase()))
                                           .collect(Collectors.toList());
-        filtered.sort((MedicalExpert me1, MedicalExpert me2)->me1.getBillingCode().compareTo(me2.getBillingCode()));
+        filtered.sort(Comparator.comparing(MedicalExpert::getBillingCode));
         grid.setItems(filtered);
 
     }
