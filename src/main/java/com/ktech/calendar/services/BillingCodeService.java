@@ -35,13 +35,9 @@ public class BillingCodeService {
         qp.put("billingCode", null, QueryComparatorEnum.NOT_NULL);
         qp.setOrderByColumns("billingCode");
 
-
-
         Optional<List<MedicalExpert>> opt = dao.findByParameters(MedicalExpert.class, qp);
         if(opt.isPresent()){
             mez = opt.get();
-
-
         }
         return mez;
 
